@@ -81,7 +81,7 @@ public class admin extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 123 && resultCode == RESULT_OK) {
-            // Nếu user đã cập nhật hoặc xoá → reload danh sách
+            // Nếu user đã cập nhật hoặc xoá thì reload danh sách
             loadUsers();
         }
     }

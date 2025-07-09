@@ -77,7 +77,7 @@ public class edit_schedule extends AppCompatActivity {
                         JSONObject obj = new JSONObject(response);
                         if (obj.getString("status").equals("success")) {
                             Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
-                            setResult(RESULT_OK); // ✅ Thêm để đồng bộ lại ở user
+                            setResult(RESULT_OK); // Thêm để đồng bộ lại ở user
                             finish();
                         } else {
                             Toast.makeText(this, "Lỗi: " + obj.getString("message"), Toast.LENGTH_LONG).show();
@@ -106,7 +106,7 @@ public class edit_schedule extends AppCompatActivity {
         StringRequest request = new StringRequest(Request.Method.POST, DELETE_URL,
                 response -> {
                     Toast.makeText(this, "Đã xóa", Toast.LENGTH_SHORT).show();
-                    setResult(RESULT_OK); // ✅ Thêm để đồng bộ lại ở user
+                    setResult(RESULT_OK); // Thêm để đồng bộ lại ở user
                     finish();
                 },
                 error -> Toast.makeText(this, "Lỗi xóa", Toast.LENGTH_SHORT).show()

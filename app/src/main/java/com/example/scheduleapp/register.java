@@ -26,20 +26,52 @@ public class register extends AppCompatActivity {
         linkToLogin = findViewById(R.id.linkToLogin);
 
         btnRegister.setOnClickListener(v -> {
-            String name = nameInput.getText().toString();
-            String email = emailInput.getText().toString();
-            String pw = passwordInput.getText().toString();
+            String name = nameInput.getText().toString().trim();
+            String email = emailInput.getText().toString().trim();
+            String pw = passwordInput.getText().toString().trim();
 
+            // Kiểm tra không để trống
+            if (name.isEmpty() || email.isEmpty() || pw.isEmpty()) {
+                Toast.makeText(this, "Vui lòng điền đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Kiểm tra định dạng email
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(this, "Email không hợp lệ!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Kiểm tra độ dài mật khẩu
+            if (pw.length() < 6) {
+                Toast.makeText(this, "Mật khẩu phải có ít nhất 6 ký tự!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Gửi yêu cầu đăng ký
             StringRequest request = new StringRequest(Request.Method.POST, URL,
                     response -> {
-                        if (response.equals("success")) {
-                            Toast.makeText(this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(this, login.class));
-                        } else {
-                            Toast.makeText(this, "Đăng ký thất bại", Toast.LENGTH_SHORT).show();
+                        switch (response.trim()) {
+                            case "success":
+                                Toast.makeText(this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(this, login.class));
+                                break;
+                            case "invalid_email":
+                                Toast.makeText(this, "Email không hợp lệ!", Toast.LENGTH_SHORT).show();
+                                break;
+                            case "empty_fields":
+                                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+                                break;
+                            case "short_password":
+                                Toast.makeText(this, "Mật khẩu phải có ít nhất 6 ký tự!", Toast.LENGTH_SHORT).show();
+                                break;
+                            case "error":
+                            default:
+                                Toast.makeText(this, "Đăng ký thất bại. Thử lại sau!", Toast.LENGTH_SHORT).show();
+                                break;
                         }
                     },
-                    error -> Toast.makeText(this, "Lỗi kết nối", Toast.LENGTH_SHORT).show()
+                    error -> Toast.makeText(this, "Lỗi kết nối. Kiểm tra internet!", Toast.LENGTH_SHORT).show()
             ) {
                 @Override
                 protected Map<String, String> getParams() {
@@ -52,6 +84,8 @@ public class register extends AppCompatActivity {
             };
             Volley.newRequestQueue(this).add(request);
         });
+
+
 
         linkToLogin.setOnClickListener(v -> {
             startActivity(new Intent(this, login.class));

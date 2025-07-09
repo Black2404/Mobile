@@ -73,7 +73,7 @@ public class user extends AppCompatActivity {
             finish();
         });
 
-        // ⚡ Xử lý nút Chat với AI
+        // Xử lý nút Chatbot
         btnChatAI.setOnClickListener(v -> {
             Intent intent = new Intent(this, ChatActivity.class);
             startActivity(intent);

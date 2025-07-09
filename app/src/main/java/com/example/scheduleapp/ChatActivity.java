@@ -46,9 +46,6 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        // Kiểm tra mô hình khả dụng khi khởi tạo
-        fetchAvailableModels();
-
         sendButton.setOnClickListener(view -> {
             String userMessage = inputMessage.getText().toString().trim();
             if (!userMessage.isEmpty()) {
@@ -60,47 +57,11 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
-
-    private void fetchAvailableModels() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            try {
-                URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models?key=" + API_KEY);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-
-                int responseCode = connection.getResponseCode();
-                InputStream inputStream = (responseCode == HttpURLConnection.HTTP_OK)
-                        ? connection.getInputStream()
-                        : connection.getErrorStream();
-
-                Scanner in = new Scanner(inputStream);
-                StringBuilder response = new StringBuilder();
-                while (in.hasNext()) {
-                    response.append(in.nextLine());
-                }
-                in.close();
-
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    JSONObject jsonResponse = new JSONObject(response.toString());
-                    JSONArray models = jsonResponse.getJSONArray("models");
-                    for (int i = 0; i < models.length(); i++) {
-                        String modelName = models.getJSONObject(i).getString("name");
-                        Log.d("AvailableModel", "Model: " + modelName);
-                    }
-                } else {
-                    Log.e("APIError", "Error fetching models: " + response);
-                }
-            } catch (Exception e) {
-                Log.e("APIError", "Exception: " + e.getMessage());
-            }
-        });
-    }
-
     private void sendMessageToGemini(String message) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             try {
+                //tạo JSON gửi theo đúng format Gemini
                 JSONObject requestBody = new JSONObject();
                 JSONArray contents = new JSONArray();
                 JSONObject userMessage = new JSONObject();
@@ -110,17 +71,20 @@ public class ChatActivity extends AppCompatActivity {
                 contents.put(userMessage);
                 requestBody.put("contents", contents);
 
+                //tạo kết nối
                 URL url = new URL(ENDPOINT);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setDoOutput(true);
                 connection.setRequestProperty("Content-Type", "application/json");
 
+                //gửi JSON lên server
                 OutputStream os = connection.getOutputStream();
                 os.write(requestBody.toString().getBytes());
                 os.flush();
                 os.close();
 
+                //lấy nd phản hồi
                 int responseCode = connection.getResponseCode();
                 InputStream inputStream = (responseCode == HttpURLConnection.HTTP_OK)
                         ? connection.getInputStream()
@@ -132,6 +96,7 @@ public class ChatActivity extends AppCompatActivity {
                     response.append(in.nextLine());
                 }
 
+                //nhận phản hồi
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     JSONObject jsonResponse = new JSONObject(response.toString());
                     String reply = jsonResponse
@@ -149,6 +114,7 @@ public class ChatActivity extends AppCompatActivity {
                     });
                 } else {
                     runOnUiThread(() -> {
+
                         messageList.add(new ChatMessage("Gemini lỗi " + responseCode + ":\n" + response, false));
                         adapter.notifyItemInserted(messageList.size() - 1);
                         recyclerView.scrollToPosition(messageList.size() - 1);

@@ -1,7 +1,5 @@
 package com.example.scheduleapp;
 
-
-
 public class ChatMessage {
     private String message;
     private boolean isUser;
